@@ -1,37 +1,43 @@
 #!/usr/bin/env groovy
 
 def call(List containers, Closure body) {
-  if (containers.size() == 0) {
-    body()
-    return
-  }
+  def containerIds = []
+  def networks = []
 
-  def c = containers.pop()
+  try {
+    containers.each {
+      def c = it
 
-  def env = ''
-  c.env.each { env += " -e ${it}"}
+      def name = c.containsKey('name') ? "--name ${c.name}" : ''
 
-  def network = c.containsKey('network') ? c.network : 'jenkins'
+      def env = ''
+      c.env.each { env += " -e ${it}"}
 
-  def params = "--network ${network} --name ${c.name} ${env}"
+      def network = c.containsKey('network') ? c.network : 'jenkins'
 
-  def networkExists = sh(script: "docker network inspect ${network}", returnStatus: true) == 0
+      def networkExists = sh(script: "docker network inspect ${network}", returnStatus: true) == 0
 
-  if (!networkExists) {
-    sh "docker network create ${network}"
-
-    try {
-      docker.image(c.image).withRun(params) {
-        call(containers, body)
+      if (!networkExists) {
+        sh "docker network create ${network}"
+        networks.push(network)
       }
-    } catch (e) {
-      throw e
-    } finally {
-      sh "docker network rm ${network}"
+
+      def params = "-d ${name} --network ${network} ${env} ${c.image}"
+      def id = sh(script: "docker run ${params}", returnStdout: true).trim()
+      containerIds.push(id)
     }
-  } else {
-    docker.image(c.image).withRun(params) {
-      call(containers, body)
+
+    body()
+  } catch (e) {
+    throw e
+  } finally {
+    containerIds.each {
+      sh "docker kill ${it}"
+      sh "docker rm ${it}"
+    }
+    
+    networks.each {
+      sh "docker network rm ${it}"
     }
   }
 }
