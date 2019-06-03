@@ -13,6 +13,9 @@ def call(List containers, Closure body) {
       def env = ''
       c.env.each { env += " -e ${it}"}
 
+      def ports = ''
+      c.ports.each { ports += " -p ${it}"}
+
       def network = c.containsKey('network') ? c.network : 'jenkins'
 
       def networkExists = sh(
@@ -26,7 +29,7 @@ def call(List containers, Closure body) {
         networks.push(network)
       }
 
-      def params = "-d ${name} --network ${network} ${env} ${c.image}"
+      def params = "-d ${name} --network ${network} ${ports} ${env} ${c.image}"
       def id = sh(script: "docker run ${params}", returnStdout: true).trim()
       containerIds.push(id)
     }
