@@ -15,7 +15,11 @@ def call(List containers, Closure body) {
 
       def network = c.containsKey('network') ? c.network : 'jenkins'
 
-      def networkExists = sh(script: "docker network inspect ${network}", returnStatus: true) == 0
+      def networkExists = sh(
+        script: "docker network inspect ${network}",
+        returnStatus: true,
+        returnStdout: true
+      ) == 0
 
       if (!networkExists) {
         sh "docker network create ${network}"
@@ -32,12 +36,12 @@ def call(List containers, Closure body) {
     throw e
   } finally {
     containerIds.each {
-      sh "docker kill ${it}"
-      sh "docker rm ${it}"
+      sh(script: "docker kill ${it}", returnStatus: true)
+      sh(script: "docker rm ${it}", returnStatus: true)
     }
     
     networks.each {
-      sh "docker network rm ${it}"
+      sh(script: "docker network rm ${it}", returnStatus: true)
     }
   }
 }
