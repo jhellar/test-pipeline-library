@@ -1,8 +1,10 @@
 #!/usr/bin/env groovy
 
 def call(String image, String network = 'jenkins', Closure body) {
+  def networkExists = true
+
   try {
-    def networkExists = sh(
+    networkExists = sh(
       script: "docker network inspect ${network}",
       returnStatus: true,
       returnStdout: true
