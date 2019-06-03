@@ -1,13 +1,5 @@
 #!/usr/bin/env groovy
 
-withContainers([
-  network: 'jenkins'
-  containers: [
-    image: 'node',
-    env: []
-  ]
-])
-
 def call(List containers, Closure body) {
   if (containers.size() == 0) {
     body()
