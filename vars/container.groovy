@@ -1,5 +1,7 @@
 #!/usr/bin/env groovy
 
+import DockerNetwork
+
 def call(String image, Closure body) {
   def network = ''
   if (DockerNetwork.current != '') {
