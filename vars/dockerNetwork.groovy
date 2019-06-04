@@ -1,6 +1,6 @@
 #!/usr/bin/env groovy
 
-currentDockerNetwork = ''
+def currentDockerNetwork = ''
 
 def call(String network = 'jenkins', Closure body) {
   def previous = currentDockerNetwork
