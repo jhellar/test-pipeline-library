@@ -1,16 +1,9 @@
 #!/usr/bin/env groovy
 
-import DockerNetwork
-
-def call(String image, Closure body) {
-  def network = ''
-  if (DockerNetwork.current != '') {
-    network = "--network ${DockerNetwork.current}"
-  }
-
+def call(String image, String network = 'jenkins', Closure body) {
   docker
     .image(image)
-    .inside("-u root:root ${network}") {
+    .inside("-u root:root --network ${network}") {
       body()
   }
 }

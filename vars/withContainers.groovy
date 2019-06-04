@@ -1,8 +1,7 @@
 #!/usr/bin/env groovy
 
-def call(List containers, Closure body) {
+def call(List containers, String network = 'jenkins', Closure body) {
   def containerIds = []
-  def networks = []
 
   try {
     containers.each {
@@ -16,19 +15,6 @@ def call(List containers, Closure body) {
       def ports = ''
       c.ports.each { ports += " -p ${it}"}
 
-      def network = c.containsKey('network') ? c.network : 'jenkins'
-
-      def networkExists = sh(
-        script: "docker network inspect ${network}",
-        returnStatus: true,
-        returnStdout: true
-      ) == 0
-
-      if (!networkExists) {
-        sh "docker network create ${network}"
-        networks.push(network)
-      }
-
       def params = "-d ${name} --network ${network} ${ports} ${env} ${c.image}"
       def id = sh(script: "docker run ${params}", returnStdout: true).trim()
       containerIds.push(id)
@@ -41,10 +27,6 @@ def call(List containers, Closure body) {
     containerIds.each {
       sh(script: "docker kill ${it}", returnStatus: true)
       sh(script: "docker rm ${it}", returnStatus: true)
-    }
-    
-    networks.each {
-      sh(script: "docker network rm ${it}", returnStatus: true)
     }
   }
 }
