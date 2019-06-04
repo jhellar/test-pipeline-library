@@ -5,7 +5,7 @@ import DockerNetwork
 def call(String image, Closure body) {
   def network = ''
   if (DockerNetwork.current != '') {
-    nework = "--network ${DockerNetwork.current}"
+    network = "--network ${DockerNetwork.current}"
   }
 
   docker
