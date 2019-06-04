@@ -2,8 +2,8 @@
 
 def call(String image, Closure body) {
   def network = ''
-  if (currentDockerNetwork != '') {
-    nework = "--network ${currentDockerNetwork}"
+  if (DockerNetwork.current != '') {
+    nework = "--network ${DockerNetwork.current}"
   }
 
   docker
